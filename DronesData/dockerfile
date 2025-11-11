@@ -1,0 +1,25 @@
+
+# Go base image 
+FROM golang:1.24.3
+
+# working directory 
+WORKDIR /app
+
+# copy go mod files and download dependencies 
+COPY  go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# copy application source code
+COPY . . 
+
+# Build the app binary
+RUN go build -o drones_data_collector
+
+# Create persistent data directory
+RUN mkdir -p /data && chmod a+rw /data
+VOLUME /data
+
+# RUN the app
+CMD [ "./drones_data_collector" ]
