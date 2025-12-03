@@ -1,37 +1,84 @@
+version: '3.8'
+
 services:
   app:
-   build: .
-   container_name: drones_data_collector
-   ports:
-    - "${PORT}:${SERVER_PORT}"
-   env_file:
-     - .env
-   depends_on:
-    - mongo
-   volumes:
-     - scheduler_state:/data
-   networks:
-    - backend
-
-
-  mongo:
-    image: mongo:4.4
-    container_name: droniq-stg-portal-db
-    restart: always
-    environment:
-     MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-     MONGO_INITDB_DATABASE: ${MONGO_DB}
+    build: .
+    container_name: dh
     ports:
-      - "27017:27017"
+      - "${PORT}:${SERVER_PORT}"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
     volumes:
-      - mongo_data:/data/db
+      - scheduler_state:/data
     networks:
       - backend
+    # MISCONFIGURATION 1: Running as root (CIS-DI-0001)
+    user: "root"
+    
+    # MISCONFIGURATION 3: Privileged container
+    privileged: true
+    
+    # MISCONFIGURATION 4: Exposing all ports
+    expose:
+      - "3000"
+      - "8080"
+      - "9000"
+
+  mongo:
+<<<<<<< HEAD
+    image: mongo:4.4
+    container_name: droniq-stg-portal-db
+=======
+    image: mongo:8.0
+    container_name: jds
+>>>>>>> eff610ac465df4e346bf87a7b50bf4c1fdf231de
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    
+    # MISCONFIGURATION 6: Exposing database port to host
+    ports:
+      - "0.0.0.0:27017:27017"  # Exposed to all interfaces
+    
+    # MISCONFIGURATION 7: Weak volume permission
+    volumes:
+      - mongo_data:/data/db
+      - ./sensitive-data:/etc/mongo  # Mounting host path with sensitive data
+    
+    networks:
+      - backend
+    
+    command: ["--noauth"]  # Disables authentication
+    
+    # MISCONFIGURATION 9: Container running with host network
+    network_mode: "host"  # Using host network (security risk)
+
+  # MISCONFIGURATION 10: Unused service definition (security scanner will flag)
+  old-mongo-backup:
+    image: mongo:4.0  # Old vulnerable version
+    container_name: backup-old
+    restart: "no"  # No restart policy
+
 
 volumes:
   mongo_data:
+    # MISCONFIGURATION 13: No volume driver specified (default may not be secure)
+    # driver: local  # Missing driver specification
+  
   scheduler_state:
+    # MISCONFIGURATION 14: Using default volume options
+    # No encryption or backup configuration
 
 networks:
   backend:
+    # MISCONFIGURATION 15: No network encryption
+    # driver: bridge  # Default bridge has no encryption
+    # driver_opts:    # Missing encryption options
+    #   com.docker.network.driver.mtu: "1500"
+    
+    # MISCONFIGURATION 16: External network without verification
+    # external: true  # Uncomment to show external network warning
