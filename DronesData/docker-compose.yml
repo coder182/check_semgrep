@@ -15,7 +15,7 @@ services:
 
 
   mongo:
-    image: mongo:8.0
+    image: mongo:4.4
     container_name: droniq-stg-portal-db
     restart: always
     environment:
