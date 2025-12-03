@@ -27,13 +27,8 @@ services:
       - "9000"
 
   mongo:
-<<<<<<< HEAD
-    image: mongo:4.4
-    container_name: droniq-stg-portal-db
-=======
     image: mongo:8.0
     container_name: jds
->>>>>>> eff610ac465df4e346bf87a7b50bf4c1fdf231de
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
