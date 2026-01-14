@@ -21,5 +21,21 @@ RUN go build -o drones_data_collector
 RUN mkdir -p /data && chmod a+rw /data
 VOLUME /data
 
+# MISCONFIGURATION: Hardcoded Secrets
+ENV API_KEY="secret_key_12345"
+
+# MISCONFIGURATION: Insecure Permissions
+RUN mkdir -p /data && chmod 777 /data
+VOLUME /data
+
+# ---------------------------------------------------------
+# NEW MISCONFIGURATION: Exposing Insecure/Privileged Ports
+# ---------------------------------------------------------
+# Port 22 
+EXPOSE 22 
+# Port 80 
+EXPOSE 80
+
+
 # RUN the app
 CMD [ "./drones_data_collector" ]
